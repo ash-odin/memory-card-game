@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+const baseURL = "https://pokeapi.co/api/v2/pokemon";
+
+function Card({ pokedexNmbr, onCardClick}) {
+  const [name, setName] = useState('');
+  const [source, setSource] = useState('');
+
+  useEffect(() => {
+    fetch(`${baseURL}/${pokedexNmbr}`)
+    .then(response => response.json())
+    .then(data => {
+      setName(data.name.charAt(0).toUpperCase() + data.name.slice(1));
+      setSource(data.sprites.front_default)
+    })
+    .catch(error => console.error("Error: ", error))
+  }, [pokedexNmbr])
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <button onClick={() => {onCardClick(pokedexNmbr)}}>
+      <img src={source} alt={`Pokemon# ${pokedexNmbr}`}/>
+      <h4>{name}</h4>
+    </button>
   )
 }
 
-export default App
+function App() {
+  const [round, setRound] = useState(0);
+  const [cardsToShow, setCardsToShow] = useState([]);
+  const [chosen, setChosen] = useState([]);
+
+  const handleChoice = (choice) => {
+    const nextChosen = chosen.slice();
+    nextChosen.push(choice)
+    setChosen(nextChosen);
+  }
+
+  let pokedexNmbr = Math.floor(Math.random() * 252);
+
+  return (
+    <>
+      <div className="header"></div>
+      <div className="game">
+        <div className="cardContainer">
+          <Card pokedexNmbr={pokedexNmbr} onCardClick={handleChoice}/>
+        </div>
+      </div>
+      <div className="footer"></div>
+    </>
+  );
+}
+
+export default App;
